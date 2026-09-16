@@ -120,11 +120,18 @@ main{
 }
 
 .hero{
-  display:grid;
-  grid-template-columns:1.05fr .95fr;
-  gap:30px;
-  align-items:center;
-  min-height:480px;
+  display:block;
+  min-height:0;
+}
+
+.hero > div:first-child{
+  max-width:900px;
+  margin:0 auto;
+  text-align:center;
+}
+
+.hero > div:last-child{
+  margin-top:34px;
 }
 
 .eyebrow{
@@ -151,7 +158,7 @@ h1{
   font-size:clamp(38px,5vw,68px);
   line-height:1.02;
   letter-spacing:-2.8px;
-  margin-bottom:20px;
+  margin-bottom:16px;
 }
 
 .gradient-text{
@@ -163,7 +170,8 @@ h1{
   color:var(--muted);
   font-size:17px;
   line-height:1.75;
-  max-width:650px;
+  max-width:720px;
+  margin:0 auto;
 }
 
 .hero-actions{
@@ -171,6 +179,7 @@ h1{
   flex-wrap:wrap;
   gap:12px;
   margin-top:27px;
+  justify-content:center;
 }
 
 .primary-btn,
@@ -208,9 +217,9 @@ h1{
 
 .simulator-card{
   position:relative;
-  height:430px;
+  height:650px;
   overflow:hidden;
-  border-radius:22px;
+  border-radius:18px;
   background:#0b1723;
   border:1px solid rgba(141,225,255,.16);
   box-shadow:var(--shadow);
@@ -497,22 +506,310 @@ h1{
   animation:flash .55s infinite;
 }
 
+.flasher::before,
+.speaker-device::before,
+.ldr-device::before{
+  content:"";
+  position:absolute;
+  top:100%;
+  left:50%;
+  width:4px;
+  height:34px;
+  transform:translateX(-50%);
+  background:linear-gradient(#9aaab1,#2e414c);
+  box-shadow:0 0 0 1px rgba(255,255,255,.16);
+}
+
+.flasher::after,
+.speaker-device::after,
+.ldr-device::after{
+  content:"";
+  position:absolute;
+  top:calc(100% + 32px);
+  left:50%;
+  width:24px;
+  height:6px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:#17232d;
+  border:1px solid rgba(255,255,255,.25);
+}
+
+.flasher-label{
+  position:absolute;
+  top:-31px;
+  left:50%;
+  width:112px;
+  transform:translateX(-50%);
+  padding:5px 6px;
+  border-radius:5px;
+  background:rgba(4,12,20,.88);
+  color:#fff36a;
+  border:1px solid rgba(234,255,0,.35);
+  font-size:8px;
+  font-weight:900;
+  line-height:1.2;
+  text-align:center;
+}
+
 /* spotlight */
 
 .spotlight{
   position:absolute;
-  right:14%;
-  top:38%;
-  width:0;
-  height:0;
-  border-left:75px solid transparent;
-  border-right:75px solid transparent;
-  border-bottom:170px solid rgba(255,255,210,.13);
-  transform:rotate(90deg);
-  transform-origin:center;
+  right:6%;
+  top:30%;
+  z-index:4;
+  width:270px;
+  height:205px;
+  background:linear-gradient(180deg,rgba(221,252,255,.28),rgba(126,224,255,.12) 58%,rgba(255,246,166,.24));
+  clip-path:polygon(72% 0,84% 0,100% 100%,8% 100%);
   opacity:0;
-  filter:blur(2px);
+  filter:blur(1.5px) drop-shadow(0 0 13px rgba(118,225,255,.35));
   transition:.5s;
+}
+
+/* LED/Laser projector pole */
+
+.projector-pole{
+  position:absolute;
+  right:19%;
+  bottom:29%;
+  z-index:9;
+  width:34px;
+  height:142px;
+  pointer-events:none;
+}
+
+.projector-pole::before{
+  content:"";
+  position:absolute;
+  left:15px;
+  bottom:0;
+  width:5px;
+  height:112px;
+  border-radius:4px;
+  background:linear-gradient(#8796a3,#263542 70%,#131d26);
+  box-shadow:0 0 0 1px rgba(255,255,255,.18),0 5px 12px rgba(0,0,0,.45);
+}
+
+.projector-pole::after{
+  content:"";
+  position:absolute;
+  left:4px;
+  bottom:0;
+  width:27px;
+  height:7px;
+  border-radius:50%;
+  background:#17232d;
+  border:1px solid rgba(255,255,255,.25);
+}
+
+.projector-head{
+  position:absolute;
+  top:18px;
+  left:0;
+  width:34px;
+  height:24px;
+  border-radius:6px 8px 8px 6px;
+  background:linear-gradient(145deg,#d9e7ec,#657582);
+  border:2px solid #1b2a35;
+  box-shadow:0 4px 10px rgba(0,0,0,.45);
+  transform:rotate(-10deg);
+}
+
+.projector-head::after{
+  content:"";
+  position:absolute;
+  right:-7px;
+  top:5px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#cfffff;
+  border:2px solid #287b91;
+  box-shadow:0 0 10px rgba(102,235,255,.9);
+}
+
+.projector-label{
+  position:absolute;
+  top:-10px;
+  right:37px;
+  width:92px;
+  padding:5px 6px;
+  border-radius:5px;
+  background:rgba(4,12,20,.84);
+  color:#d9f8ff;
+  font-size:8px;
+  font-weight:800;
+  line-height:1.25;
+  text-align:right;
+  border:1px solid rgba(141,225,255,.2);
+}
+
+.projector-pole.active .projector-head::after{
+  background:#fff36a;
+  box-shadow:0 0 12px var(--yellow),0 0 25px rgba(234,255,0,.65);
+}
+
+/* top-down concept scene */
+
+.simulator-card{
+  height:650px;
+  background:#14202b;
+}
+
+.sky{
+  inset:0;
+  background:
+    linear-gradient(rgba(91,136,82,.28),rgba(91,136,82,.28)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,transparent 1px 54px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 1px,transparent 1px 80px),
+    #667a6e;
+}
+
+.night .sky{
+  background:
+    linear-gradient(rgba(21,46,70,.5),rgba(21,46,70,.5)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 54px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 80px),
+    #304b57;
+}
+
+.sun{
+  top:4%;
+  right:5%;
+  width:42px;
+  height:42px;
+}
+
+.road{
+  left:23%;
+  right:23%;
+  top:0;
+  bottom:0;
+  height:auto;
+  clip-path:none;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 38px),
+    linear-gradient(#273440,#18232e);
+  border-left:8px solid #aab7af;
+  border-right:8px solid #aab7af;
+}
+
+.road-line{
+  top:0;
+  bottom:0;
+  left:50%;
+  width:4px;
+  height:100%;
+  transform:none;
+  transform:translateX(-50%);
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.72) 0 42px,transparent 42px 82px);
+}
+
+.road-edge{
+  top:0;
+  bottom:0;
+  width:3px;
+  height:100%;
+  transform:none!important;
+  background:rgba(255,255,255,.35);
+}
+
+.road-edge.left{left:31%;right:auto}
+.road-edge.right{right:31%;left:auto}
+
+.zebra{
+  top:50%;
+  bottom:auto;
+  left:23%;
+  width:54%;
+  height:18%;
+  transform:translateY(-50%);
+  perspective:none;
+  rotate:none;
+  gap:7px;
+}
+
+.zebra span{
+  min-height:0;
+  background:linear-gradient(90deg,#dffaff,#fff,#bff4ff);
+}
+
+.sensor{
+  left:14%;
+  top:44%;
+  bottom:auto;
+}
+
+.pedestrian{
+  left:13%;
+  top:40%;
+  bottom:auto;
+}
+
+.pedestrian.near{left:13%;top:40%;bottom:auto}
+.pedestrian.crossing{left:75%;top:40%;bottom:auto}
+
+.car-right{
+  right:31%;
+  top:-90px;
+  transform:rotate(90deg);
+  transition:top 2s linear,filter .3s;
+}
+
+.car-right.approach{top:24%}
+.car-right.braking{top:30%;right:31%;transition:top .7s linear,filter .3s}
+
+.car-left{
+  left:31%;
+  bottom:-90px;
+  top:auto;
+  transform:rotate(-90deg);
+  transition:bottom 2s linear,filter .3s;
+}
+
+.car-left.approach{bottom:24%}
+.car-left.braking{bottom:30%;left:31%;transition:bottom .7s linear,filter .3s}
+
+.spotlight{
+  right:12%;
+  top:13%;
+  width:220px;
+  height:48%;
+  background:linear-gradient(180deg,rgba(188,246,255,.42),rgba(90,207,255,.18) 60%,rgba(255,246,166,.32));
+  clip-path:polygon(47% 0,62% 0,92% 100%,8% 100%);
+}
+
+.projector-pole{right:17%;top:7%;bottom:auto}
+
+.flasher{right:12%;top:42%;bottom:auto}
+
+.scene-device{
+  position:absolute;
+  z-index:18;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 9px;
+  border-radius:8px;
+  color:#f7fbff;
+  background:rgba(9,29,46,.88);
+  border:1px solid rgba(141,225,255,.55);
+  box-shadow:0 5px 12px rgba(0,0,0,.25);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.4px;
+}
+
+.scene-device .device-icon{color:var(--yellow);font-size:18px;line-height:1}
+.ldr-device{right:7%;top:17%}
+.controller-device{left:39%;bottom:7%}
+.speaker-device{left:auto;right:3%;top:26%}
+
+.speaker-device,
+.ldr-device{
+  z-index:19;
 }
 
 .night .spotlight.active{
@@ -998,12 +1295,25 @@ footer{
   }
 
   .road{
-    height:62%;
+    left:20%;
+    right:20%;
+    top:0;
+    bottom:0;
+    height:auto;
   }
 
   .zebra{
-    width:65%;
+    left:20%;
+    width:60%;
+    height:18%;
   }
+
+  .simulator-card{height:500px}
+  .projector-label{display:none}
+  .scene-device{font-size:7px;padding:5px 6px}
+  .controller-device{left:35%;bottom:5%}
+  .speaker-device{left:auto;right:2%;top:26%}
+  .spotlight{width:150px}
 }
 </style>
 </head>
@@ -1046,9 +1356,7 @@ footer{
       </div>
 
       <h1>
-        Virtual<br>
-        <span class="gradient-text">Zebra Cross</span><br>
-        Simulation
+        Virtual <span class="gradient-text">Zebra Cross</span> Simulation
       </h1>
 
       <p class="hero-description">
@@ -1100,7 +1408,7 @@ footer{
         <div class="sensor" id="pirSensor">
           <div class="sensor-wave"></div>
           <div class="sensor-box">◉</div>
-          <div class="sensor-label">PIR SENSOR</div>
+          <div class="sensor-label">SENSOR PIR</div>
         </div>
 
         <!-- pedestrian -->
@@ -1138,11 +1446,35 @@ footer{
 
         <!-- flasher -->
 
-        <div class="flasher" id="flasher"></div>
+        <div class="flasher" id="flasher">
+          <div class="flasher-label">LAMPU FLASHER KUNING</div>
+        </div>
 
         <!-- spotlight -->
 
         <div class="spotlight" id="spotlight"></div>
+
+        <!-- LED/Laser projector pole -->
+
+        <div class="projector-pole" id="projectorPole">
+          <div class="projector-head"></div>
+          <div class="projector-label">PROYEKTOR<br>LED / LASER</div>
+        </div>
+
+        <div class="scene-device ldr-device">
+          <div class="device-icon">☀</div>
+          <span>SENSOR LDR</span>
+        </div>
+
+        <div class="scene-device controller-device">
+          <div class="device-icon">▦</div>
+          <span>MIKROKONTROLER<br>(ARDUINO / ESP32)</span>
+        </div>
+
+        <div class="scene-device speaker-device">
+          <div class="device-icon">◖</div>
+          <span>SPEAKER DIRECTIONAL</span>
+        </div>
 
       </div>
 
@@ -1583,6 +1915,7 @@ const carRight = document.getElementById("carRight");
 const carLeft = document.getElementById("carLeft");
 const flasher = document.getElementById("flasher");
 const spotlight = document.getElementById("spotlight");
+const projectorPole = document.getElementById("projectorPole");
 
 const systemStatus = document.getElementById("systemStatus");
 const systemStatusText = document.getElementById("systemStatusText");
@@ -1628,6 +1961,8 @@ function activatePedestrian(){
   state.active = true;
 
   pedestrian.classList.add("walking");
+  carRight.style.top="-90px";
+  carLeft.style.bottom="-90px";
   carRight.classList.add("approach");
   carLeft.classList.add("approach");
 
@@ -1676,6 +2011,7 @@ function activatePedestrian(){
     if(state.mode==="night"){
 
       zebra.classList.add("active");
+      projectorPole.classList.add("active");
 
       crossValue.textContent="ACTIVE";
       crossValue.style.color="var(--yellow)";
@@ -1701,8 +2037,6 @@ function activatePedestrian(){
 
     flasher.classList.add("active");
 
-    pedestrian.classList.add("crossing");
-
     driverValue.textContent="SLOWING";
     driverValue.style.color="var(--yellow)";
 
@@ -1718,13 +2052,22 @@ function activatePedestrian(){
     carRight.classList.add("braking");
     carLeft.classList.add("braking");
 
-    carRight.style.top="40%";
-    carLeft.style.bottom="40%";
+    carRight.style.top="30%";
+    carLeft.style.bottom="30%";
 
     driverValue.textContent="BRAKING";
     driverValue.style.color="var(--red)";
 
-  },4200);
+  },3500);
+
+
+  /* PEDESTRIAN CROSSES AFTER BOTH CARS STOP */
+
+  setTimeout(()=>{
+
+    pedestrian.classList.add("crossing");
+
+  },4400);
 
 
   /* AUDIO (siang) / PROJECTOR BEAM (malam) */
@@ -1774,6 +2117,7 @@ function resetSimulation(){
   flasher.classList.remove("active");
 
   spotlight.classList.remove("active");
+  projectorPole.classList.remove("active");
 
   carRight.classList.remove("approach","braking");
   carRight.style.top="-90px";
@@ -1856,6 +2200,7 @@ function setMode(mode){
       }
 
       zebra.classList.add("active");
+      projectorPole.classList.add("active");
 
       crossValue.textContent="ACTIVE";
       crossValue.style.color="var(--yellow)";
@@ -1895,6 +2240,7 @@ function setMode(mode){
     `;
 
     spotlight.classList.remove("active");
+    projectorPole.classList.remove("active");
 
     beamState.textContent="OFF";
     beamState.classList.remove("on");
