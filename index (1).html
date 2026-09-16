@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071525">
+<title>Virtual Zebra Cross Simulation</title>
+
+<style>
+:root{
+  --bg:#071525;
+  --panel:#0d2135;
+  --panel2:#102b44;
+  --blue:#59c7ff;
+  --blue2:#8de1ff;
+  --white:#f7fbff;
+  --yellow:#eaff00;
+  --yellow2:#fff36a;
+  --red:#ff425d;
+  --green:#39ff9b;
+  --muted:#9bb3c8;
+  --road:#202b35;
+  --road2:#293640;
+  --shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  color:var(--white);
+  background:
+    radial-gradient(circle at 15% 0%,rgba(89,199,255,.12),transparent 30%),
+    radial-gradient(circle at 90% 20%,rgba(234,255,0,.06),transparent 25%),
+    var(--bg);
+  min-height:100vh;
+}
+
+button{
+  font:inherit;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  backdrop-filter:blur(16px);
+  background:rgba(7,21,37,.88);
+  border-bottom:1px solid rgba(141,225,255,.12);
+}
+
+.navbar{
+  max-width:1250px;
+  margin:auto;
+  min-height:72px;
+  padding:12px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:800;
+  letter-spacing:.3px;
+}
+
+.logo-icon{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--blue),#2779bd);
+  color:#061423;
+  box-shadow:0 0 24px rgba(89,199,255,.3);
+  font-size:22px;
+}
+
+.nav-links{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:7px;
+}
+
+.nav-links button{
+  color:#a9c0d2;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:9px;
+  padding:8px 12px;
+  cursor:pointer;
+  transition:.25s;
+  font-size:13px;
+}
+
+.nav-links button:hover,
+.nav-links button.active{
+  color:var(--white);
+  background:rgba(89,199,255,.09);
+  border-color:rgba(89,199,255,.2);
+}
+
+main{
+  max-width:1250px;
+  margin:auto;
+  padding:34px 22px 70px;
+}
+
+.hero{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:30px;
+  align-items:center;
+  min-height:480px;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--blue2);
+  font-size:13px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1.6px;
+  margin-bottom:15px;
+}
+
+.eyebrow span{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+h1{
+  font-size:clamp(38px,5vw,68px);
+  line-height:1.02;
+  letter-spacing:-2.8px;
+  margin-bottom:20px;
+}
+
+.gradient-text{
+  color:var(--blue2);
+  text-shadow:0 0 30px rgba(89,199,255,.18);
+}
+
+.hero-description{
+  color:var(--muted);
+  font-size:17px;
+  line-height:1.75;
+  max-width:650px;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:27px;
+}
+
+.primary-btn,
+.secondary-btn{
+  border:none;
+  cursor:pointer;
+  border-radius:11px;
+  padding:13px 18px;
+  font-weight:800;
+  transition:.25s;
+}
+
+.primary-btn{
+  background:var(--yellow);
+  color:#101500;
+  box-shadow:0 0 22px rgba(234,255,0,.2);
+}
+
+.primary-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 32px rgba(234,255,0,.35);
+}
+
+.secondary-btn{
+  background:#132d44;
+  color:var(--white);
+  border:1px solid rgba(141,225,255,.18);
+}
+
+.secondary-btn:hover{
+  background:#193b58;
+}
+
+/* ================= SIMULATOR ================= */
+
+.simulator-card{
+  position:relative;
+  height:430px;
+  overflow:hidden;
+  border-radius:22px;
+  background:#0b1723;
+  border:1px solid rgba(141,225,255,.16);
+  box-shadow:var(--shadow);
+}
+
+.sky{
+  position:absolute;
+  inset:0 0 43% 0;
+  background:
+    radial-gradient(circle at 75% 30%,rgba(255,255,255,.8) 0 2px,transparent 3px),
+    radial-gradient(circle at 25% 25%,rgba(255,255,255,.5) 0 1px,transparent 2px),
+    linear-gradient(#5abde8,#bceeff);
+  transition:.6s;
+}
+
+.night .sky{
+  background:
+    radial-gradient(circle at 75% 30%,#fff 0 2px,transparent 3px),
+    radial-gradient(circle at 25% 25%,#fff 0 1px,transparent 2px),
+    linear-gradient(#061325,#112f4e);
+}
+
+.sun{
+  position:absolute;
+  top:30px;
+  right:50px;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#fff5a3;
+  box-shadow:0 0 35px rgba(255,245,163,.8);
+  transition:.6s;
+}
+
+.night .sun{
+  width:42px;
+  height:42px;
+  background:#d9ecff;
+  box-shadow:0 0 24px rgba(210,235,255,.45);
+}
+
+.road{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:65%;
+  background:
+    linear-gradient(150deg,transparent 0 35%,rgba(255,255,255,.04) 35% 35.5%,transparent 35.5%),
+    linear-gradient(165deg,#293641,#151d24);
+  clip-path:polygon(18% 0,82% 0,100% 100%,0 100%);
+}
+
+.road-line{
+  position:absolute;
+  top:12%;
+  bottom:0;
+  left:50%;
+  width:5px;
+  transform:translateX(-50%);
+  background:repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.5) 0 35px,
+    transparent 35px 70px
+  );
+  opacity:.55;
+}
+
+.road-edge{
+  position:absolute;
+  bottom:0;
+  width:5px;
+  height:100%;
+  background:rgba(255,255,255,.16);
+}
+
+.road-edge.left{
+  left:12%;
+  transform:rotate(9deg);
+}
+
+.road-edge.right{
+  right:12%;
+  transform:rotate(-9deg);
+}
+
+/* Zebra projection */
+
+.zebra{
+  position:absolute;
+  left:50%;
+  bottom:28%;
+  width:52%;
+  height:88px;
+  transform:translateX(-50%) perspective(300px) rotateX(48deg);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  opacity:0;
+  transition:.7s;
+  filter:drop-shadow(0 0 5px #fff);
+  pointer-events:none;
+}
+
+.zebra.active{
+  opacity:1;
+  filter:
+    drop-shadow(0 0 5px white)
+    drop-shadow(0 0 12px var(--yellow));
+}
+
+.zebra span{
+  display:block;
+  flex:1;
+  background:linear-gradient(90deg,#fff,var(--yellow2),#fff);
+  box-shadow:
+    0 0 7px #fff,
+    0 0 17px rgba(234,255,0,.9);
+  border-radius:2px;
+}
+
+/* Sensor */
+
+.sensor{
+  position:absolute;
+  left:12%;
+  bottom:27%;
+  z-index:10;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+}
+
+.sensor-box{
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  background:#263544;
+  border:2px solid var(--red);
+  box-shadow:0 0 12px rgba(255,66,93,.45);
+  display:grid;
+  place-items:center;
+  transition:.3s;
+}
+
+.sensor.detected .sensor-box{
+  border-color:var(--green);
+  box-shadow:
+    0 0 10px var(--green),
+    0 0 25px rgba(57,255,155,.45);
+}
+
+.sensor-wave{
+  position:absolute;
+  width:95px;
+  height:95px;
+  border-radius:50%;
+  border:2px solid rgba(255,66,93,.35);
+  opacity:.7;
+  animation:pulse 2s infinite;
+}
+
+.sensor.detected .sensor-wave{
+  border-color:rgba(57,255,155,.45);
+}
+
+.sensor-label{
+  background:rgba(4,12,20,.8);
+  padding:4px 7px;
+  border-radius:5px;
+  font-size:9px;
+  font-weight:800;
+}
+
+/* pedestrian */
+
+.pedestrian{
+  position:absolute;
+  left:20%;
+  bottom:27%;
+  z-index:15;
+  font-size:45px;
+  transform:scaleX(-1);
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.4));
+  transition:left 1.5s cubic-bezier(.4,0,.2,1), bottom 1.5s cubic-bezier(.4,0,.2,1);
+}
+
+.pedestrian.near{
+  left:20%;
+  bottom:27%;
+}
+
+.pedestrian.crossing{
+  left:78%;
+  bottom:27%;
+  transition:left 3.2s linear;
+}
+
+.pedestrian.walking{
+  animation:walkBob .4s infinite alternate;
+}
+
+/* car */
+
+.car{
+  position:absolute;
+  z-index:12;
+  font-size:54px;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,.5));
+  transition:filter .3s;
+}
+
+.car-right{
+  right:30%;
+  top:-90px;
+  transform:rotate(90deg);
+  transform-origin:center;
+  transition:top 2s linear, filter .3s;
+}
+
+.car-right.approach{
+  top:25%;
+}
+
+.car-right.braking{
+  transition:top .7s cubic-bezier(.1,.8,.2,1), filter .3s;
+  top:40%;
+}
+
+.car-left{
+  left:30%;
+  bottom:-90px;
+  transform:rotate(-90deg);
+  transform-origin:center;
+  transition:bottom 2s linear, filter .3s;
+}
+
+.car-left.approach{
+  bottom:20%;
+}
+
+.car-left.braking{
+  transition:bottom .7s cubic-bezier(.1,.8,.2,1), filter .3s;
+  bottom:40%;
+}
+
+.brake-lights{
+  position:absolute;
+  left:6px;
+  right:6px;
+  bottom:13px;
+  display:flex;
+  justify-content:space-between;
+  opacity:0;
+}
+
+.car.braking .brake-lights{
+  opacity:1;
+}
+
+.brake-lights i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#ff172e;
+  box-shadow:0 0 15px #ff172e;
+}
+
+/* flasher */
+
+.flasher{
+  position:absolute;
+  right:7%;
+  bottom:34%;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:#555;
+  border:2px solid #777;
+}
+
+.flasher.active{
+  animation:flash .55s infinite;
+}
+
+/* spotlight */
+
+.spotlight{
+  position:absolute;
+  right:14%;
+  top:38%;
+  width:0;
+  height:0;
+  border-left:75px solid transparent;
+  border-right:75px solid transparent;
+  border-bottom:170px solid rgba(255,255,210,.13);
+  transform:rotate(90deg);
+  transform-origin:center;
+  opacity:0;
+  filter:blur(2px);
+  transition:.5s;
+}
+
+.night .spotlight.active{
+  opacity:1;
+  animation:beamPulse 1.4s infinite alternate;
+}
+
+/* status */
+
+.status-bar{
+  position:absolute;
+  top:15px;
+  left:15px;
+  right:15px;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.status-pill{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:rgba(3,12,20,.72);
+  border:1px solid rgba(255,255,255,.1);
+  padding:7px 10px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:800;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--red);
+}
+
+.status-pill.active .status-dot{
+  background:var(--green);
+  box-shadow:0 0 9px var(--green);
+}
+
+/* ================= CONTROL PANEL ================= */
+
+.control-panel{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:15px;
+  margin-top:15px;
+}
+
+.control{
+  background:linear-gradient(145deg,#0d2135,#0a1a2b);
+  border:1px solid rgba(141,225,255,.12);
+  border-radius:16px;
+  padding:17px;
+}
+
+.control h3{
+  font-size:12px;
+  color:#9fc1d8;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:9px;
+}
+
+.control-value{
+  font-size:21px;
+  font-weight:900;
+}
+
+.control-sub{
+  font-size:11px;
+  color:#6f899d;
+  margin-top:4px;
+}
+
+.mode-toggle{
+  display:flex;
+  background:#07131f;
+  padding:4px;
+  border-radius:9px;
+  margin-top:10px;
+}
+
+.mode-toggle button{
+  flex:1;
+  border:none;
+  padding:8px;
+  border-radius:7px;
+  color:#7691a4;
+  background:transparent;
+  cursor:pointer;
+  font-size:11px;
+  font-weight:800;
+}
+
+.mode-toggle button.active{
+  background:#183954;
+  color:var(--white);
+}
+
+/* ================= SECTIONS ================= */
+
+section{
+  scroll-margin-top:100px;
+  padding-top:80px;
+}
+
+.section-heading{
+  margin-bottom:28px;
+}
+
+.section-heading small{
+  color:var(--blue);
+  text-transform:uppercase;
+  font-size:11px;
+  letter-spacing:2px;
+  font-weight:800;
+}
+
+.section-heading h2{
+  font-size:34px;
+  margin-top:8px;
+}
+
+.section-heading p{
+  color:var(--muted);
+  margin-top:9px;
+  max-width:700px;
+  line-height:1.7;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+.info-card{
+  background:linear-gradient(145deg,rgba(16,43,68,.9),rgba(8,25,42,.9));
+  border:1px solid rgba(141,225,255,.12);
+  border-radius:17px;
+  padding:22px;
+  transition:.3s;
+}
+
+.info-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(89,199,255,.3);
+}
+
+.info-icon{
+  width:42px;
+  height:42px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:rgba(89,199,255,.1);
+  font-size:20px;
+  margin-bottom:15px;
+}
+
+.info-card h3{
+  margin-bottom:8px;
+}
+
+.info-card p{
+  color:var(--muted);
+  line-height:1.65;
+  font-size:14px;
+}
+
+/* Timeline */
+
+.flow{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:0;
+  position:relative;
+}
+
+.flow:before{
+  content:"";
+  position:absolute;
+  left:10%;
+  right:10%;
+  top:34px;
+  height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--yellow));
+  opacity:.3;
+}
+
+.flow-step{
+  position:relative;
+  text-align:center;
+  padding:0 10px;
+}
+
+.flow-number{
+  width:68px;
+  height:68px;
+  margin:0 auto 15px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#0d2941;
+  border:2px solid rgba(89,199,255,.4);
+  color:var(--blue2);
+  font-size:19px;
+  font-weight:900;
+  position:relative;
+  z-index:2;
+}
+
+.flow-step.active .flow-number{
+  border-color:var(--yellow);
+  color:var(--yellow);
+  box-shadow:0 0 25px rgba(234,255,0,.25);
+}
+
+.flow-step h4{
+  font-size:13px;
+  margin-bottom:7px;
+}
+
+.flow-step p{
+  color:#7893a7;
+  font-size:11px;
+  line-height:1.5;
+}
+
+/* System monitor */
+
+.monitor{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:18px;
+}
+
+.monitor-card{
+  background:#091a2b;
+  border:1px solid rgba(141,225,255,.12);
+  border-radius:17px;
+  padding:20px;
+}
+
+.monitor-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:17px;
+}
+
+.monitor-title h3{
+  font-size:14px;
+}
+
+.signal{
+  padding:5px 8px;
+  border-radius:6px;
+  background:#122d43;
+  color:var(--blue);
+  font-size:9px;
+  font-weight:800;
+}
+
+.metric{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.metric:last-child{
+  border-bottom:0;
+}
+
+.metric-icon{
+  width:35px;
+  height:35px;
+  border-radius:9px;
+  background:#102c44;
+  display:grid;
+  place-items:center;
+}
+
+.metric-text{
+  flex:1;
+}
+
+.metric-text strong{
+  display:block;
+  font-size:12px;
+}
+
+.metric-text span{
+  color:#71899b;
+  font-size:10px;
+}
+
+.metric-state{
+  font-size:10px;
+  font-weight:900;
+  color:#71899b;
+}
+
+.metric-state.on{
+  color:var(--green);
+}
+
+.warning-box{
+  margin-top:18px;
+  border-radius:13px;
+  padding:15px;
+  background:rgba(234,255,0,.05);
+  border:1px solid rgba(234,255,0,.13);
+}
+
+.warning-box strong{
+  color:var(--yellow);
+  font-size:12px;
+}
+
+.warning-box p{
+  color:#a0aeb8;
+  font-size:11px;
+  line-height:1.6;
+  margin-top:6px;
+}
+
+.spec-list{
+  list-style:none;
+}
+
+.spec-list li{
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:12px;
+  color:#a0b4c4;
+  line-height:1.5;
+}
+
+.spec-list li:last-child{
+  border-bottom:0;
+}
+
+.spec-list strong{
+  color:var(--white);
+  font-weight:800;
+  margin-right:4px;
+}
+
+/* footer */
+
+footer{
+  border-top:1px solid rgba(141,225,255,.1);
+  margin-top:80px;
+  padding:28px 22px;
+  color:#647d90;
+  font-size:11px;
+  text-align:center;
+}
+
+/* animations */
+
+@keyframes pulse{
+  0%{transform:scale(.45);opacity:0}
+  30%{opacity:.7}
+  100%{transform:scale(1.15);opacity:0}
+}
+
+@keyframes walkBob{
+  from{transform:scaleX(-1) translateY(0)}
+  to{transform:scaleX(-1) translateY(-5px)}
+}
+
+@keyframes flash{
+  0%,45%{
+    background:#555;
+    box-shadow:none;
+  }
+  46%,100%{
+    background:var(--yellow);
+    box-shadow:0 0 20px var(--yellow),0 0 40px rgba(234,255,0,.5);
+  }
+}
+
+@keyframes beamPulse{
+  from{opacity:.45}
+  to{opacity:.95}
+}
+
+@media(max-width:900px){
+  .hero{
+    grid-template-columns:1fr;
+  }
+
+  .control-panel{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .info-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .monitor{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:650px){
+  .navbar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .nav-links{
+    width:100%;
+    overflow-x:auto;
+    justify-content:flex-start;
+    flex-wrap:nowrap;
+    padding-bottom:2px;
+  }
+
+  .nav-links button{
+    white-space:nowrap;
+  }
+
+  main{
+    padding:25px 14px 50px;
+  }
+
+  h1{
+    letter-spacing:-1.5px;
+  }
+
+  .hero{
+    min-height:auto;
+  }
+
+  .simulator-card{
+    height:350px;
+  }
+
+  .control-panel,
+  .info-grid{
+    grid-template-columns:1fr;
+  }
+
+  .flow{
+    grid-template-columns:1fr;
+    gap:22px;
+  }
+
+  .flow:before{
+    display:none;
+  }
+
+  .flow-step{
+    display:grid;
+    grid-template-columns:55px 1fr;
+    text-align:left;
+    gap:14px;
+  }
+
+  .flow-number{
+    width:55px;
+    height:55px;
+    margin:0;
+  }
+
+  .flow-step p{
+    margin-top:4px;
+  }
+
+  section{
+    padding-top:55px;
+  }
+
+  .road{
+    height:62%;
+  }
+
+  .zebra{
+    width:65%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon">🚸</div>
+      <div>
+        <div>Virtual Zebra Cross</div>
+        <small style="color:#7190a4;font-weight:500">Smart Crossing Simulation</small>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <button class="active" onclick="scrollToSection('deskripsi')">Deskripsi</button>
+      <button onclick="scrollToSection('sensor')">Sensor</button>
+      <button onclick="scrollToSection('proyeksi')">Proyeksi</button>
+      <button onclick="scrollToSection('peringatan')">Peringatan</button>
+      <button onclick="scrollToSection('mode')">Mode Siang/Malam</button>
+      <button onclick="scrollToSection('timdata')">Tim & Data</button>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<!-- HERO -->
+
+<section id="deskripsi" style="padding-top:35px">
+
+  <div class="hero">
+
+    <div>
+      <div class="eyebrow">
+        <span></span>
+        Interactive Road Safety System
+      </div>
+
+      <h1>
+        Virtual<br>
+        <span class="gradient-text">Zebra Cross</span><br>
+        Simulation
+      </h1>
+
+      <p class="hero-description">
+        Sistem penyeberangan pintar non-fisik yang memproyeksikan
+        zebra cross bercahaya terang secara otomatis saat ada
+        pejalan kaki.
+      </p>
+
+      <div class="hero-actions">
+        <button class="primary-btn" onclick="activatePedestrian()">
+          🚶 Pejalan Kaki Mendekat
+        </button>
+
+        <button class="secondary-btn" onclick="resetSimulation()">
+          ↻ Reset
+        </button>
+      </div>
+    </div>
+
+
+    <!-- SIMULATION -->
+
+    <div>
+      <div class="simulator-card" id="simulator">
+
+        <div class="sky"></div>
+        <div class="sun"></div>
+
+        <div class="status-bar">
+          <div class="status-pill" id="systemStatus">
+            <span class="status-dot"></span>
+            <span id="systemStatusText">SYSTEM STANDBY</span>
+          </div>
+
+          <div class="status-pill">
+            <span id="clockIcon">☀️</span>
+            <span id="clockText">SIANG</span>
+          </div>
+        </div>
+
+        <div class="road">
+          <div class="road-line"></div>
+          <div class="road-edge left"></div>
+          <div class="road-edge right"></div>
+        </div>
+
+        <!-- PIR -->
+
+        <div class="sensor" id="pirSensor">
+          <div class="sensor-wave"></div>
+          <div class="sensor-box">◉</div>
+          <div class="sensor-label">PIR SENSOR</div>
+        </div>
+
+        <!-- pedestrian -->
+
+        <div class="pedestrian" id="pedestrian">
+          🚶
+        </div>
+
+        <!-- zebra cross -->
+
+        <div class="zebra" id="zebra">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <!-- cars -->
+
+        <div class="car car-right" id="carRight">
+          🚗
+          <div class="brake-lights">
+            <i></i><i></i>
+          </div>
+        </div>
+
+        <div class="car car-left" id="carLeft">
+          🚗
+          <div class="brake-lights">
+            <i></i><i></i>
+          </div>
+        </div>
+
+        <!-- flasher -->
+
+        <div class="flasher" id="flasher"></div>
+
+        <!-- spotlight -->
+
+        <div class="spotlight" id="spotlight"></div>
+
+      </div>
+
+
+      <div class="control-panel">
+
+        <div class="control">
+          <h3>PIR Sensor</h3>
+          <div class="control-value" id="pirValue">STANDBY</div>
+          <div class="control-sub">Passive infrared detection</div>
+        </div>
+
+        <div class="control">
+          <h3>Crossing Status</h3>
+          <div class="control-value" id="crossValue">OFF</div>
+          <div class="control-sub">Virtual projection</div>
+        </div>
+
+        <div class="control">
+          <h3>Driver Warning</h3>
+          <div class="control-value" id="driverValue">NORMAL</div>
+          <div class="control-sub">Vehicle response</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- SENSOR -->
+
+<section id="sensor">
+
+  <div class="section-heading">
+    <small>01 — Detection</small>
+    <h2>Deteksi Pasif PIR & Sensor LDR</h2>
+    <p>
+      Sensor PIR (inframerah pasif) terus aktif memantau radiasi
+      panas tubuh pejalan kaki yang berdiri di tepi trotoar sebagai
+      pemicu utama. Sensor LDR secara paralel mengukur intensitas
+      cahaya sekitar (lux) untuk menentukan mode operasional sistem —
+      siang (suara + flasher) atau malam (proyeksi cahaya + flasher).
+    </p>
+  </div>
+
+  <div class="monitor">
+
+    <div class="monitor-card">
+
+      <div class="monitor-title">
+        <h3>Sensor Monitoring</h3>
+        <div class="signal" id="sensorSignal">WAITING</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-icon">🌡️</div>
+        <div class="metric-text">
+          <strong>Thermal Radiation</strong>
+          <span>Radiasi inframerah tubuh</span>
+        </div>
+        <div class="metric-state" id="thermalState">WAIT</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-icon">📡</div>
+        <div class="metric-text">
+          <strong>PIR Sensor</strong>
+          <span>Pemicu utama, selalu aktif memantau</span>
+        </div>
+        <div class="metric-state" id="pirState">ACTIVE</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-icon">💡</div>
+        <div class="metric-text">
+          <strong>LDR Sensor</strong>
+          <span>Intensitas cahaya sekitar (lux)</span>
+        </div>
+        <div class="metric-state on" id="ldrState">820 lux (Terang)</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-icon">🧠</div>
+        <div class="metric-text">
+          <strong>Microcontroller</strong>
+          <span>Virtual control signal</span>
+        </div>
+        <div class="metric-state" id="mcuState">IDLE</div>
+      </div>
+
+    </div>
+
+    <div class="monitor-card">
+
+      <div class="monitor-title">
+        <h3>Detection Logic</h3>
+        <div class="signal">AUTO</div>
+      </div>
+
+      <div class="warning-box">
+        <strong>🔴 Standby</strong>
+        <p>
+          PIR terus memantau radiasi termal khas tubuh manusia
+          di tepi trotoar, sementara LDR membaca lux lingkungan
+          secara berkelanjutan.
+        </p>
+      </div>
+
+      <div class="warning-box" style="margin-top:10px">
+        <strong style="color:var(--green)">🟢 Detection</strong>
+        <p>
+          Ketika pejalan kaki berada di zona deteksi, sinyal PIR
+          dikirim ke mikrokontroler, yang lalu membaca nilai LDR
+          untuk memilih output: audio + flasher (lux tinggi) atau
+          proyektor + flasher (lux rendah).
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- PROJECTION -->
+
+<section id="proyeksi">
+
+  <div class="section-heading">
+    <small>02 — Projection</small>
+    <h2>Virtual Zebra Cross Projection</h2>
+    <p>
+      Mikrokontroler memberikan perintah kepada sistem
+      proyektor LED/Laser untuk menghasilkan marka
+      penyeberangan bercahaya di permukaan jalan.
+    </p>
+  </div>
+
+  <div class="flow">
+
+    <div class="flow-step" id="step1">
+      <div class="flow-number">01</div>
+      <div>
+        <h4>PIR Detect</h4>
+        <p>Pejalan kaki masuk zona sensor.</p>
+      </div>
+    </div>
+
+    <div class="flow-step" id="step2">
+      <div class="flow-number">02</div>
+      <div>
+        <h4>Signal</h4>
+        <p>Sinyal dikirim ke mikrokontroler.</p>
+      </div>
+    </div>
+
+    <div class="flow-step" id="step3">
+      <div class="flow-number">03</div>
+      <div>
+        <h4>Process</h4>
+        <p>Mikrokontroler memproses trigger.</p>
+      </div>
+    </div>
+
+    <div class="flow-step" id="step4">
+      <div class="flow-number">04</div>
+      <div>
+        <h4>Projection</h4>
+        <p>LED/Laser memproyeksikan zebra cross.</p>
+      </div>
+    </div>
+
+    <div class="flow-step" id="step5">
+      <div class="flow-number">05</div>
+      <div>
+        <h4>Warning</h4>
+        <p>Pengemudi menerima sinyal peringatan.</p>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- WARNING -->
+
+<section id="peringatan">
+
+  <div class="section-heading">
+    <small>03 — Driver Alert</small>
+    <h2>Peringatan Pengemudi</h2>
+    <p>
+      Ketika zebra cross aktif, sistem memberikan peringatan
+      visual dan memperlambat kendaraan virtual.
+    </p>
+  </div>
+
+  <div class="info-grid">
+
+    <div class="info-card">
+      <div class="info-icon">🟡</div>
+      <h3>Flasher Warning</h3>
+      <p>
+        Lampu flasher kuning di sisi jalan berkedip
+        sebagai sinyal visual kepada pengemudi.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">🚗</div>
+      <h3>Automatic Slowdown</h3>
+      <p>
+        Kendaraan virtual mengurangi kecepatannya
+        ketika sistem mendeteksi penyeberang.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">🛑</div>
+      <h3>Brake Effect</h3>
+      <p>
+        Lampu rem kendaraan menyala untuk
+        memvisualisasikan proses pengereman.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- MODE -->
+
+<section id="mode">
+
+  <div class="section-heading">
+    <small>04 — Environment</small>
+    <h2>Mode Siang & Malam (via LDR)</h2>
+    <p>
+      Mode operasional ditentukan oleh pembacaan sensor LDR (lux).
+      Lux tinggi (siang) mengaktifkan audio + flasher dan mematikan
+      proyektor untuk menghemat daya. Lux rendah (malam) mengaktifkan
+      proyektor LED/Laser + flasher, audio dimatikan.
+    </p>
+  </div>
+
+  <div class="monitor">
+
+    <div class="monitor-card">
+
+      <div class="monitor-title">
+        <h3>Environment Mode</h3>
+        <div class="signal" id="modeSignal">DAY MODE</div>
+      </div>
+
+      <div class="mode-toggle">
+        <button id="dayBtn" class="active" onclick="setMode('day')">
+          ☀️ SIANG
+        </button>
+
+        <button id="nightBtn" onclick="setMode('night')">
+          🌙 MALAM
+        </button>
+      </div>
+
+      <div class="metric" style="margin-top:12px">
+        <div class="metric-icon">🔊</div>
+        <div class="metric-text">
+          <strong>Audio Alert</strong>
+          <span>Sirine-style warning tone</span>
+        </div>
+        <div class="metric-state" id="audioState">READY</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-icon">💡</div>
+        <div class="metric-text">
+          <strong>Driver Spotlight</strong>
+          <span>Additional visual beam</span>
+        </div>
+        <div class="metric-state" id="beamState">OFF</div>
+      </div>
+
+    </div>
+
+
+    <div class="monitor-card">
+
+      <div class="monitor-title">
+        <h3>Mode Behavior</h3>
+      </div>
+
+      <div class="warning-box" id="modeDescription">
+        <strong>☀️ Mode Siang (Lux Tinggi)</strong>
+        <p>
+          Audio terarah menyuarakan peringatan otomatis dan
+          flasher kuning menyala. Proyektor aspal dimatikan
+          untuk menghemat daya.
+        </p>
+      </div>
+
+      <button
+        class="secondary-btn"
+        style="width:100%;margin-top:15px"
+        onclick="toggleAudio()"
+        id="audioButton">
+        🔊 Test Audio Alert
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- STAKEHOLDERS, DATA & HARDWARE -->
+
+<section id="timdata">
+
+  <div class="section-heading">
+    <small>05 — Tim & Data</small>
+    <h2>Pemangku Kepentingan, Data & Komponen</h2>
+    <p>
+      Pengembangan dan pengujian prototipe melibatkan beberapa
+      pihak, serta memanfaatkan sejumlah data lapangan dan
+      komponen hardware pendukung.
+    </p>
+  </div>
+
+  <div class="info-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:26px">
+
+    <div class="info-card">
+      <div class="info-icon">🎓</div>
+      <h3>Mahasiswa</h3>
+      <p>
+        Perancang hardware, pemrograman sistem mikrokontroler,
+        dan pengujian prototipe.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">🚦</div>
+      <h3>Dinas Perhubungan & Satlantas</h3>
+      <p>
+        Memberikan izin koordinasi pengujian dan rekomendasi
+        titik pemasangan tiang.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">🚶‍♂️</div>
+      <h3>Pengguna Jalan</h3>
+      <p>
+        Pejalan kaki dan pengendara sebagai subjek pengguna
+        dan penerima respons visual sistem.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <div class="info-icon">🏬</div>
+      <h3>Pengelola Pertokoan (Vitasari)</h3>
+      <p>
+        Penyedia titik penempatan tiang portabel/sumber daya
+        untuk uji coba.
+      </p>
+    </div>
+
+  </div>
+
+  <div class="monitor">
+
+    <div class="monitor-card">
+      <div class="monitor-title">
+        <h3>Data yang Dikumpulkan</h3>
+      </div>
+      <ul class="spec-list">
+        <li><strong>Lux Meter</strong> — tingkat pencahayaan lingkungan</li>
+        <li><strong>Sound Meter</strong> — data kebisingan latar belakang</li>
+        <li><strong>Volume Pejalan Kaki</strong> — jumlah penyeberang</li>
+        <li><strong>Kelajuan Kendaraan</strong> — kecepatan rata-rata dari arah turunan</li>
+      </ul>
+    </div>
+
+    <div class="monitor-card">
+      <div class="monitor-title">
+        <h3>Komponen Hardware</h3>
+      </div>
+      <ul class="spec-list">
+        <li><strong>Sensor PIR</strong> — deteksi inframerah pasif</li>
+        <li><strong>Sensor LDR</strong> — pengukur intensitas cahaya</li>
+        <li><strong>Modul Proyektor LED/Laser</strong> — intensitas tinggi</li>
+        <li><strong>Modul Audio (DFPlayer)</strong> + pengeras suara terarah</li>
+        <li><strong>Mikrokontroler</strong> — Arduino / ESP32</li>
+        <li><strong>Lampu Flasher Kuning</strong></li>
+        <li><strong>Tiang Portabel</strong></li>
+        <li><strong>Catu Daya</strong> — baterai / panel surya</li>
+      </ul>
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer>
+  Virtual Zebra Cross Simulation — Interactive Smart Road Safety Concept
+</footer>
+
+
+<script>
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let state = {
+  active:false,
+  mode:"day",
+  audioEnabled:true
+};
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const simulator = document.getElementById("simulator");
+const pedestrian = document.getElementById("pedestrian");
+const pirSensor = document.getElementById("pirSensor");
+const zebra = document.getElementById("zebra");
+const carRight = document.getElementById("carRight");
+const carLeft = document.getElementById("carLeft");
+const flasher = document.getElementById("flasher");
+const spotlight = document.getElementById("spotlight");
+
+const systemStatus = document.getElementById("systemStatus");
+const systemStatusText = document.getElementById("systemStatusText");
+
+const pirValue = document.getElementById("pirValue");
+const crossValue = document.getElementById("crossValue");
+const driverValue = document.getElementById("driverValue");
+
+const thermalState = document.getElementById("thermalState");
+const pirState = document.getElementById("pirState");
+const ldrState = document.getElementById("ldrState");
+const mcuState = document.getElementById("mcuState");
+const sensorSignal = document.getElementById("sensorSignal");
+
+const audioState = document.getElementById("audioState");
+const beamState = document.getElementById("beamState");
+
+const clockText = document.getElementById("clockText");
+const clockIcon = document.getElementById("clockIcon");
+const modeSignal = document.getElementById("modeSignal");
+const modeDescription = document.getElementById("modeDescription");
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function scrollToSection(id){
+  document.getElementById(id).scrollIntoView({
+    behavior:"smooth"
+  });
+}
+
+
+/* =========================================================
+   ACTIVATE PEDESTRIAN
+========================================================= */
+
+function activatePedestrian(){
+
+  if(state.active) return;
+
+  state.active = true;
+
+  pedestrian.classList.add("walking");
+  carRight.classList.add("approach");
+  carLeft.classList.add("approach");
+
+  /* STEP 1 */
+
+  setTimeout(()=>{
+
+    pirSensor.classList.add("detected");
+
+    systemStatus.classList.add("active");
+    systemStatusText.textContent="PIR DETECTED";
+
+    pirValue.textContent="DETECTED";
+    pirValue.style.color="var(--green)";
+
+    thermalState.textContent="DETECTED";
+    thermalState.classList.add("on");
+
+    pirState.textContent="ACTIVE";
+    pirState.classList.add("on");
+
+    sensorSignal.textContent="DETECTED";
+
+    document.getElementById("step1").classList.add("active");
+
+  },800);
+
+
+  /* STEP 2 */
+
+  setTimeout(()=>{
+
+    mcuState.textContent="SIGNAL";
+    mcuState.classList.add("on");
+
+    document.getElementById("step2").classList.add("active");
+    document.getElementById("step3").classList.add("active");
+
+  },1500);
+
+
+  /* STEP 3 — MCU membaca LDR, memilih output proyektor/audio */
+
+  setTimeout(()=>{
+
+    if(state.mode==="night"){
+
+      zebra.classList.add("active");
+
+      crossValue.textContent="ACTIVE";
+      crossValue.style.color="var(--yellow)";
+
+    }else{
+
+      /* Siang: proyektor dimatikan untuk hemat daya */
+
+      zebra.classList.remove("active");
+
+      crossValue.textContent="OFF (Hemat Daya)";
+      crossValue.style.color="var(--muted)";
+    }
+
+    document.getElementById("step4").classList.add("active");
+
+  },2300);
+
+
+  /* STEP 4 */
+
+  setTimeout(()=>{
+
+    flasher.classList.add("active");
+
+    pedestrian.classList.add("crossing");
+
+    driverValue.textContent="SLOWING";
+    driverValue.style.color="var(--yellow)";
+
+    document.getElementById("step5").classList.add("active");
+
+  },2700);
+
+
+  /* BRAKING */
+
+  setTimeout(()=>{
+
+    carRight.classList.add("braking");
+    carLeft.classList.add("braking");
+
+    carRight.style.top="40%";
+    carLeft.style.bottom="40%";
+
+    driverValue.textContent="BRAKING";
+    driverValue.style.color="var(--red)";
+
+  },4200);
+
+
+  /* AUDIO (siang) / PROJECTOR BEAM (malam) */
+
+  setTimeout(()=>{
+
+    if(state.mode==="day"){
+
+      if(state.audioEnabled){
+        speakWarning();
+      }
+
+      audioState.textContent="ACTIVE";
+      audioState.classList.add("on");
+
+    }else{
+
+      spotlight.classList.add("active");
+
+      beamState.textContent="ACTIVE";
+      beamState.classList.add("on");
+    }
+
+  },3000);
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetSimulation(){
+
+  state.active=false;
+
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+  }
+
+  pedestrian.classList.remove("near","walking","crossing");
+
+  pirSensor.classList.remove("detected");
+
+  zebra.classList.remove("active");
+
+  flasher.classList.remove("active");
+
+  spotlight.classList.remove("active");
+
+  carRight.classList.remove("approach","braking");
+  carRight.style.top="-90px";
+
+  carLeft.classList.remove("approach","braking");
+  carLeft.style.bottom="-90px";
+
+  systemStatus.classList.remove("active");
+  systemStatusText.textContent="SYSTEM STANDBY";
+
+  pirValue.textContent="STANDBY";
+  pirValue.style.color="";
+
+  crossValue.textContent="OFF";
+  crossValue.style.color="";
+
+  driverValue.textContent="NORMAL";
+  driverValue.style.color="";
+
+  thermalState.textContent="WAIT";
+  thermalState.classList.remove("on");
+
+  pirState.textContent="OFF";
+  pirState.classList.remove("on");
+
+  mcuState.textContent="IDLE";
+  mcuState.classList.remove("on");
+
+  sensorSignal.textContent="WAITING";
+
+  audioState.textContent="READY";
+  audioState.classList.remove("on");
+
+  beamState.textContent="OFF";
+  beamState.classList.remove("on");
+
+  for(let i=1;i<=5;i++){
+    document.getElementById("step"+i).classList.remove("active");
+  }
+}
+
+
+/* =========================================================
+   DAY / NIGHT MODE
+========================================================= */
+
+function setMode(mode){
+
+  state.mode=mode;
+
+  if(mode==="night"){
+
+    simulator.classList.add("night");
+
+    document.getElementById("dayBtn").classList.remove("active");
+    document.getElementById("nightBtn").classList.add("active");
+
+    clockText.textContent="MALAM";
+    clockIcon.textContent="🌙";
+
+    modeSignal.textContent="NIGHT MODE";
+
+    ldrState.textContent="12 lux (Gelap)";
+    ldrState.classList.remove("on");
+
+    modeDescription.innerHTML=`
+      <strong>🌙 Mode Malam (Lux Rendah)</strong>
+      <p>
+        LDR membaca lux rendah. Mikrokontroler mengaktifkan
+        proyektor LED/Laser untuk memancarkan garis zebra cross
+        bercahaya terang ke aspal, didampingi flasher kuning ke
+        arah atas turunan jalan. Modul audio dimatikan.
+      </p>
+    `;
+
+    if(state.active){
+
+      if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+      }
+
+      zebra.classList.add("active");
+
+      crossValue.textContent="ACTIVE";
+      crossValue.style.color="var(--yellow)";
+
+      spotlight.classList.add("active");
+
+      beamState.textContent="ACTIVE";
+      beamState.classList.add("on");
+
+      audioState.textContent="OFF";
+      audioState.classList.remove("on");
+    }
+
+  }else{
+
+    simulator.classList.remove("night");
+
+    document.getElementById("dayBtn").classList.add("active");
+    document.getElementById("nightBtn").classList.remove("active");
+
+    clockText.textContent="SIANG";
+    clockIcon.textContent="☀️";
+
+    modeSignal.textContent="DAY MODE";
+
+    ldrState.textContent="820 lux (Terang)";
+    ldrState.classList.add("on");
+
+    modeDescription.innerHTML=`
+      <strong>☀️ Mode Siang (Lux Tinggi)</strong>
+      <p>
+        LDR membaca lux tinggi. Mikrokontroler mengaktifkan modul
+        audio terarah yang menyuarakan peringatan otomatis dan
+        flasher kuning. Proyektor aspal dimatikan untuk menghemat
+        daya.
+      </p>
+    `;
+
+    spotlight.classList.remove("active");
+
+    beamState.textContent="OFF";
+    beamState.classList.remove("on");
+
+    if(state.active){
+
+      zebra.classList.remove("active");
+
+      crossValue.textContent="OFF (Hemat Daya)";
+      crossValue.style.color="var(--muted)";
+
+      if(state.audioEnabled){
+        speakWarning();
+      }
+
+      audioState.textContent="ACTIVE";
+      audioState.classList.add("on");
+    }
+  }
+}
+
+
+/* =========================================================
+   AUDIO ENGINE — modul audio terarah (voice warning)
+========================================================= */
+
+const WARNING_TEXT =
+  "Kurangi kecepatan, ada pejalan kaki menyeberang!";
+
+function speakWarning(){
+
+  if(!("speechSynthesis" in window)){
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(WARNING_TEXT);
+  const indonesianVoice = window.speechSynthesis.getVoices().find(voice =>
+    voice.lang.toLowerCase().startsWith("id")
+  );
+
+  utterance.lang = "id-ID";
+  if(indonesianVoice){
+    utterance.voice = indonesianVoice;
+  }
+  utterance.rate = 0.95;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+
+  window.speechSynthesis.speak(utterance);
+}
+
+
+function toggleAudio(){
+
+  state.audioEnabled=!state.audioEnabled;
+
+  if(state.audioEnabled){
+
+    document.getElementById("audioButton").textContent=
+      "🔊 Audio Alert: ON";
+
+    speakWarning();
+
+    if(state.active && state.mode==="day"){
+      audioState.textContent="ACTIVE";
+      audioState.classList.add("on");
+    }
+
+  }else{
+
+    if("speechSynthesis" in window){
+      window.speechSynthesis.cancel();
+    }
+
+    document.getElementById("audioButton").textContent=
+      "🔇 Audio Alert: OFF";
+
+    audioState.textContent="MUTED";
+    audioState.classList.remove("on");
+  }
+}
+
+
+/* =========================================================
+   SIMULASI PEMBACAAN LDR AWAL
+========================================================= */
+
+/*
+  Karena ini simulasi (tanpa sensor LDR fisik), nilai lux awal
+  didekati dari jam perangkat:
+  06:00–17:59 = lux tinggi (siang)
+  18:00–05:59 = lux rendah (malam)
+
+  Pengguna tetap dapat mengganti mode secara manual lewat
+  tombol SIANG/MALAM, mensimulasikan perubahan pembacaan LDR.
+*/
+
+function autoTimeMode(){
+
+  const hour=new Date().getHours();
+
+  if(hour>=6 && hour<18){
+    setMode("day");
+  }else{
+    setMode("night");
+  }
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+
+  autoTimeMode();
+
+  /*
+    Setelah otomatis memilih mode berdasarkan jam,
+    tombol siang/malam tetap dapat digunakan secara manual.
+  */
+
+});
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener("keydown",(e)=>{
+
+  if(e.code==="Space"){
+
+    e.preventDefault();
+
+    activatePedestrian();
+  }
+
+  if(e.key.toLowerCase()==="r"){
+
+    resetSimulation();
+  }
+
+  if(e.key.toLowerCase()==="n"){
+
+    setMode(
+      state.mode==="day"
+      ? "night"
+      : "day"
+    );
+  }
+});
+
+</script>
+
+</body>
+</html>
